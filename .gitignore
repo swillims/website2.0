@@ -1,3 +1,14 @@
+# Random stuff not covered by default gitignore or specific use case
+.firebase/
+.firebaserc
+.idea/
+.metadata
+websitetwo.iml
+
+# Stuff to avoid leaking keys
+**/index.html
+**/initializeFirebase.dart
+
 # Miscellaneous
 *.class
 *.lock
@@ -6,8 +17,6 @@
 *.swp
 .buildlog/
 .history
-
-
 
 # Flutter repo-specific
 /bin/cache/
