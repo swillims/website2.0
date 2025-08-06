@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'main.dart';
+
+import 'login.dart';
 import 'admin.dart';
 
 class Sidebar extends StatelessWidget 
@@ -53,10 +55,14 @@ class Sidebar extends StatelessWidget
           (
             child: Text
             (
-              "dd",
+              "Login/Logout",
               style: TextStyle(color: Colors.white),
             ),
-            onPressed: (){},
+            onPressed: (){
+              Navigator.pushReplacement(
+                context,PageRouteBuilder(pageBuilder: (context, animation1, animation2) => 
+                Login(),transitionDuration: Duration.zero,reverseTransitionDuration: Duration.zero,),);
+            },
           ),
           TextButton
           (

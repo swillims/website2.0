@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
-void signIn(String useremail, String userpassword) async
+Future<bool> signIn(String useremail, String userpassword) async
 {
   try {
     await FirebaseAuth.instance.signInWithEmailAndPassword
@@ -11,7 +13,11 @@ void signIn(String useremail, String userpassword) async
       email: useremail,
       password: userpassword,
     );
-  }catch (e) {}
+    return true;
+  }catch (e)
+  {
+    return false;
+  }
 }
 
 Future<void> signInAnonymously() async
@@ -22,6 +28,13 @@ Future<void> signInAnonymously() async
   } catch (e) {
     print("Failed to sign in anonymously: $e");
   }
+}
+
+String hash(String input, String salt)
+{
+  var bytes = utf8.encode(salt+input);
+  var hash = sha256.convert(bytes);
+  return hash.toString();
 }
 
 class MediaHolder

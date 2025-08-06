@@ -6,37 +6,35 @@ import 'sidebar.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 
-class Admin extends StatefulWidget 
+class Login extends StatefulWidget 
 {
-  const Admin({super.key});
+  const Login({super.key});
 
   @override
-  State<Admin> createState() => _AdminState();
+  State<Login> createState() => _Login();
 }
 
-class _AdminState extends State<Admin> 
+class _Login extends State<Login> 
 {
+  String errorString="";
   String userEmail="";
   String userPassword="";
-  String errorString="";
-  bool validated=false;
-  bool deny=false;
+
+  bool createAccount = false;
+
   @override
   Widget build(BuildContext context)
   {
-    User? user = FirebaseAuth.instance.currentUser;
-    if(validated)
+    if(createAccount)
     {
-      print("v");
+      return createAccountScreen(context);
     }
+    User? user = FirebaseAuth.instance.currentUser;
     if(user==null || user.isAnonymous || user.email==null)
     {
       return notLoginedIn(context);
     }
-    if(!deny & !user.isAnonymous)
-    {
-      return loadscreen(context);
-    }
+
     return Scaffold
     (
       body: Row
@@ -97,15 +95,15 @@ class _AdminState extends State<Admin>
                   mainAxisSize: MainAxisSize.min,
                   children: 
                   [
+                    Text
+                    (
+                      errorString,
+                      style: TextStyle(color: Colors.red),
+                    ),
                     Row
                     (
                       children: 
                       [
-                        Text
-                        (
-                          errorString,
-                          style: TextStyle(color: Colors.red),
-                        ),
                         SizedBox
                         (
                           width: MediaQuery.of(context).size.width * 0.1,
@@ -116,6 +114,7 @@ class _AdminState extends State<Admin>
                           width: MediaQuery.of(context).size.width * 0.6,
                           child: TextField
                           (
+                            key: Key("LoEm"),
                             decoration: InputDecoration
                             (
                               border: OutlineInputBorder(),
@@ -140,6 +139,7 @@ class _AdminState extends State<Admin>
                           width: MediaQuery.of(context).size.width * 0.6,
                           child: TextField
                           (
+                            key: Key("LoPa"),
                             decoration: InputDecoration
                             (
                               border: OutlineInputBorder(),
@@ -153,8 +153,25 @@ class _AdminState extends State<Admin>
                     ),
                     TextButton
                     (
-                      onPressed: (){login(userEmail, userPassword);},
+                      onPressed: ()
+                      {
+                        login(userEmail, userPassword);
+                      },
                       child: Text("Login")
+                    ),
+                    TextButton
+                    (
+                      onPressed: ()
+                      {
+                        setState(() 
+                        {
+                          createAccount = true;
+                          errorString = "";
+                          userEmail="";
+                          userPassword="";
+                        });
+                      },
+                      child: Text("Create Account")
                     )
                   ],
                 )
@@ -165,8 +182,7 @@ class _AdminState extends State<Admin>
       )
     );
   }
-
-  Scaffold adminZone(BuildContext context)
+  Scaffold createAccountScreen(BuildContext context)
   {
     return Scaffold
     (
@@ -191,43 +207,85 @@ class _AdminState extends State<Admin>
                   mainAxisSize: MainAxisSize.min,
                   children: 
                   [
-                    Text("Secret Admin Space"),
-                  ]
-                )
-              )
-            )
-          )
-        ]
-      )
-    );
-  }
-  Scaffold loadscreen(BuildContext context)
-  {
-    validate();
-    return Scaffold
-    (
-      body: Row
-      (
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: 
-        [
-          Sidebar(),
-          SingleChildScrollView
-          (
-            child: Container
-            (
-              width: MediaQuery.of(context).size.width * 0.85,
-              //color: Colors.grey,
-              child: Padding
-              (
-                padding: EdgeInsets.all(20.0),
-                child: Column
-                (
-                  mainAxisSize: MainAxisSize.min,
-                  children: 
-                  [
-                    Text("Validating..."),
+                    Text
+                    (
+                      errorString,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    Row
+                    (
+                      children: 
+                      [
+                        SizedBox
+                        (
+                          width: MediaQuery.of(context).size.width * 0.1,
+                          child: Text("Email:"),
+                        ),
+                        SizedBox
+                        (
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          child: TextField
+                          (
+                            key: Key("CrEm"),
+                            decoration: InputDecoration
+                            (
+                              border: OutlineInputBorder(),
+                              labelText: 'name@example.com',
+                            ),
+                            //obscureText: true,
+                            onChanged: (value){ userEmail = value; }
+                          ),
+                        )
+                      ],
+                    ),
+                    Row
+                    (
+                      children: 
+                      [
+                        SizedBox
+                        (
+                          width: MediaQuery.of(context).size.width * 0.1,
+                          child: Text("Password:"),
+                        ),
+                        SizedBox
+                        (
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          child: TextField
+                          (
+                            key: Key("CrPa"),
+                            decoration: InputDecoration
+                            (
+                              border: OutlineInputBorder(),
+                              labelText: 'A#123456',
+                            ),
+                            obscureText: true,
+                            onChanged: (value){ userPassword = value; }
+                          ),
+                        )
+                      ],
+                    ),
+                    TextButton
+                    (
+                      onPressed: ()
+                      {
+                        createNewAccount(userEmail, userPassword);
+                      },
+                      child: Text("Create Account")
+                    ),
+                    TextButton
+                    (
+                      onPressed: ()
+                      {
+                        setState(() 
+                        {
+                          errorString="";
+                          userEmail="";
+                          userPassword="";
+                          createAccount = false;
+                        });
+                      },
+                      child: Text("Back")
+                    )
                   ]
                 )
               )
@@ -260,36 +318,62 @@ class _AdminState extends State<Admin>
       return;
     }
   }
-    void logout() async
+
+  void logout() async
   {
     await FirebaseAuth.instance.signOut();
+    await FirebaseAuth.instance.signInAnonymously();
     setState(()
     {
       errorString="";
       userEmail="";
       userPassword="";
+      createAccount = false;
     });
   }
-  void validate() async
+
+  // create account wrote in non-reusabled way because used in one location
+  void createNewAccount(String email, String password) async
   {
-    var uu = FirebaseAuth.instance.currentUser!.email.toString();
-    if(uu!=null && uu!="")
+    if(email==null || email=="")
     {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(uu).get();
-      
-      if(doc.exists)
-      {
-        final data = doc.data();
-        if(data!.containsKey("admin"))
-        {
-          if(data["admin"]==true)
-          {
-            setState(() {validated=true;});
-          }
-        }
-      }
+      setState(() {errorString = "Missing Email";});
+      return;
     }
-    setState(() { deny = true;});
+    if(password==null || password=="")
+    {
+      setState(() {errorString = "Missing Password";});
+      return;
+    }
+    final users = await FirebaseFirestore.instance.collection('users');
+    final doc = await users.doc(email).get();
+    if(doc.exists)
+    {
+      setState((){errorString = "Email already exists";});
+      return;
+    }
+    try
+    {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      await FirebaseFirestore.instance.collection('users').doc(email).set(
+      {
+        'password': hash(password, "A3@22a"), // decoy password
+        'admin': false
+      });
+      setState(()
+      {
+        errorString="";
+        userEmail="";
+        userPassword="";
+        createAccount = false;
+      });
+    } catch (e)
+    {
+      setState(() {errorString = e.toString();});
+      return;
+    }
   }
 }
-
